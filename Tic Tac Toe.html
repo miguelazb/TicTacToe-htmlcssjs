@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>Tic Tac Toe</title>
+	<link href="https://fonts.googleapis.com/css?family=Gaegu|Merriweather" rel="stylesheet">
+
+	<style>
+		@keyframes parpadeoBordeVictoria{
+			0%{border: 2px dashed rgba(0,0,0,.5);}
+			50%{border: 2px dashed rgba(0,255,0,.8);}
+			100%{border: 2px dashed rgba(0,0,0,.5);}
+		}
+		@keyframes parpadeoBordeEmpate{
+			0%{border: 2px dashed rgba(0,0,0,.5);}
+			50%{border: 2px dashed rgba(255,255,255,.8);}
+			100%{border: 2px dashed rgba(0,0,0,.5);}
+		}
+		*{
+			margin:0;
+			padding:0;
+			box-sizing: border-box;
+		}
+		body{
+			font-family: Arial, Sans-serif, Helvetica;
+			font-size: 16px;
+			background: #0B3948;
+		}
+		.todo{
+			margin:20px auto;
+			width: 90%;
+			max-width: 320px;
+			background: #30474A;
+			border:1px solid rgba(0,0,0,.4);
+			border-radius: 10px;
+		}
+		.tabla{
+			margin:10px auto;
+			margin-bottom: 0;
+		}
+		.tabla td{
+			margin:0;
+		}
+		.tabla td button{
+			width: 65px;
+			height: 65px;
+			font-size:40px;
+			margin:5px;
+			border: 2px solid rgba(0,0,0,.4);
+			border-radius: 15px;
+			outline:none;
+			background: #aaa;
+		}
+		.visual .info{
+			width:100%;
+			padding:20px 40px;
+			padding-bottom:0;
+			display:flex;
+			flex-direction:row;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			
+		}
+		.visual .info h1{
+			width: 100%;
+			align-self: center;
+			text-align: center;
+			margin-bottom: 10px;
+			font-family: 'Gaegu', cursive;
+			font-size: 40px;
+		}
+		.visual .info #textoTurno{
+			padding:13px 5px;
+			/*background: #fff;*/
+			border-radius:5px;
+			border: 2px dashed rgba(0,0,0,.5);
+			color:#8EA68B;
+			font-family: 'Merriweather', serif;
+		}
+		.parpadeoVictoria{
+			animation: parpadeoBordeVictoria .3s ease infinite;	
+		}
+		.parpadeoEmpate{
+			animation: parpadeoBordeEmpate .3s ease infinite;
+		}
+		.visual .info #score{
+			text-align: right;
+			padding: 5px;
+			/*background: #fff;*/
+			border-radius:5px;
+			color:#8EA68B;
+			border: 2px dashed rgba(0,0,0,.5);
+			font-family: 'Merriweather', serif;
+		}
+		.opciones{
+			display: flex;
+			width: 100%;
+			padding:20px 40px;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: space-around;
+		}
+		.opciones button{
+			padding:10px;
+			border: 2px solid rgba(0,0,0,.4);
+			border-radius: 5px;
+			outline:none;
+			background: #ef121d;
+			font-size:16px;
+			color: #ccc;
+		}
+		.opciones button:hover{
+			background:#d4071a;
+			color: #888;
+		}
+		.opciones button:active{
+			background:#d4071a;
+			color: #888;
+		}
+		button:hover{
+			cursor:pointer;
+		}
+		.estiloO:disabled{
+			color:#0FAA38;
+			border: 2px solid #0FAA38;
+			background: #eee;
+		}
+		.estiloX:disabled{
+			color:#360FAA;
+			border: 2px solid #360FAA;
+			background: #eee;
+		}
+		.estiloO:hover:disabled, .estiloX:hover:disabled{
+			cursor:default;
+		}
+		
+		@media screen and (max-width: 340px) {
+			.visual .info p{
+				font-size:14px;
+			}
+		}
+
+	</style>
+</head>
+<body>
+	<div class="todo">
+		<section class="visual">
+
+			<div class="info">
+				<h1>Tic Tac Toe</h1>
+				<div class="textoTurno">
+					<p id="textoTurno">Turno de: X.</p>
+				</div>
+				<div class="score">
+					<p id="score">Puntos X: 0<br>
+					Puntos O: 0</p>
+				</div>
+			</div>
+		</section>
+		<table class="tabla">
+			<tr>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+			</tr>
+			<tr>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+			</tr>
+			<tr>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+				<td><button class="btn"> </button></td>
+			</tr>
+		</table>
+		<section class="opciones">
+			<button id="playAgain">Replay</button>
+			<button id="resetAll">Restart</button>
+		</section>
+	</div>
+	<script>
+		var botones = document.getElementsByClassName('btn');
+		var textoTurno = document.getElementById('textoTurno');
+		var btnPlayAgain = document.getElementById('playAgain');
+		var btnResetAll = document.getElementById('resetAll');
+		var score = document.getElementById('score');
+
+		btnPlayAgain.addEventListener('click', restart);
+		btnResetAll.addEventListener('click', restartAll);
+
+		var turno = "O";
+		var turnos = 0;
+		var turnoInicio = "X";
+		var ganador;
+		var empate = false;
+		var puntosX = 0;
+		var puntosO = 0;
+
+		for (var i = 0; i < botones.length; i++) {
+			var ID = 'btn'+i;
+			botones[i].id = ID;
+			
+			botones[i].addEventListener('click', function() {
+				escritura(this); 
+			});
+			botones[i].addEventListener('click', validacion);
+		}
+		document.addEventListener('keypress', (event)=>{
+			const keyName = event.key.toLowerCase();
+			switch(keyName){
+				case 'q':
+					if(!botones[0].disabled){
+						escritura(botones[0]); 
+						validacion();
+					} break;			
+				case 'w':
+					if(!botones[1].disabled){
+						escritura(botones[1]); 
+						validacion();
+					} break;				
+				case 'e':
+					if(!botones[2].disabled){
+						escritura(botones[2]); 
+						validacion();
+					} break;				
+				case 'a':
+					if(!botones[3].disabled){
+						escritura(botones[3]);
+						validacion();
+					} break;				
+				case 's':
+					if(!botones[4].disabled){
+						escritura(botones[4]); 
+						validacion();
+					} break;				
+				case 'd':
+					if(!botones[5].disabled){
+						escritura(botones[5]); 
+						validacion();
+					} break;				
+				case 'z':
+					if(!botones[6].disabled){
+						escritura(botones[6]); 
+						validacion();
+					} break;				
+				case 'x':
+					if(!botones[7].disabled){
+						escritura(botones[7]); 
+						validacion();
+					} break;				
+				case 'c':
+					if(!botones[8].disabled){
+						escritura(botones[8]); 
+						validacion();
+					} break;
+				case 'r':
+					restart();
+					break;				
+			}
+		});
+		function escritura(bt){
+				bt.setAttribute('disabled', 'disabled');
+				bt.classList.add(turno=='X'?'estiloX':'estiloO');				
+				turno = turno=='O'?'X':'O';
+				bt.textContent = turno;
+				turnos++;
+		}
+		function validacion(){
+			var arr = [];
+			terminado = false;	
+			for (var i = 0; i < botones.length; i++) {
+				arr.push(botones[i].textContent);
+			}
+			//****HORIZONTAL (3), VERTICAL (4), DIAGONAL (2)****
+			if((arr[0]!=' ' && arr[0] == arr[1] && arr[0] == arr[2])||(//H
+				arr[3]!=' ' && arr[3] == arr[4] && arr[3] == arr[5])||(//H
+				arr[6]!=' ' && arr[6] == arr[7] && arr[6] == arr[8])||(//H
+				arr[0]!=' ' && arr[0] == arr[3] && arr[0] == arr[6])||(//V
+				arr[1]!=' ' && arr[1] == arr[4] && arr[1] == arr[7])||(//V
+				arr[2]!=' ' && arr[2] == arr[5] && arr[2] == arr[8])||(//V
+				arr[0]!=' ' && arr[0] == arr[4] && arr[0] == arr[8])||(//D
+				arr[2]!=' ' && arr[2] == arr[4] && arr[2] == arr[6])){ //D
+					ganador = turno;
+					terminado = true;
+			}
+			if(terminado){
+				textoTurno.textContent = '¡Ganador! ' + turno;
+				textoTurno.classList.add('parpadeoVictoria');
+				terminar();
+			}else if(turnos==9){
+				empate = true;
+				textoTurno.textContent = 'Empate.';
+				textoTurno.classList.add('parpadeoEmpate');
+				terminar();
+				return;
+			}else{
+				textoTurno.textContent = 'Turno de: ' + (turno=='O'?'X':'O') + '.';
+			}
+		}
+		function terminar(){
+			if(!empate){
+				ganador=='X'?puntosX++:puntosO++;
+				score.innerHTML = 'Puntos X: '+puntosX+'<br>Puntos O: '+puntosO;
+			}
+			for (var i = 0; i < botones.length; i++) {
+				botones[i].disabled = true;
+			}
+			empate = false;
+		}
+		function restart(){
+			for (var i = 0; i < botones.length; i++) {
+				botones[i].textContent = ' ';
+				botones[i].disabled = false;
+				botones[i].classList.remove('estiloO');
+				botones[i].classList.remove('estiloX');
+			}
+			turnos = 0;
+			textoTurno.textContent = 'Turno de: '+ turnoInicio+ '.';
+			textoTurno.classList.remove('parpadeoEmpate');
+			textoTurno.classList.remove('parpadeoVictoria');
+			empate = 0;
+			turnoInicio = turnoInicio=='X'?'O':'X';
+			turno = turnoInicio;
+		}
+		function restartAll(){
+			restart();
+			puntosO = 0;
+			puntosX = 0;
+			score.innerHTML = 'Puntos X: 0<br>Puntos O: 0';
+		}
+	</script>
+</body>
+</html>
